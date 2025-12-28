@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mental Health Bot</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Mental Health Chat</h1>
+
+    <label>Name:</label>
+    <input type="text" id="name" placeholder="Your name">
+
+    <div class="mood-section">
+      <p>How are you feeling today?</p>
+      <div class="emojis">
+        <button class="emoji">😃</button>
+        <button class="emoji">🙂</button>
+        <button class="emoji">😐</button>
+        <button class="emoji">😔</button>
+        <button class="emoji">😣</button>
+      </div>
+    </div>
+
+    <textarea id="message" placeholder="Type your mood or feelings here..."></textarea>
+    <button id="sendBtn">Send</button>
+
+    <h2>Chat:</h2>
+    <div id="chat" class="chat-box"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
