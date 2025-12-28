@@ -12,8 +12,7 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, "You: " + message]);
 
     try {
-      cconst res = await fetch("https://mental-health-journal-chatbot.onrender.com/messages", {
-
+      const res = await fetch("https://mental-health-journal-chatbot.onrender.com/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,6 +33,29 @@ export default function ChatPage() {
     }
   };
 
+    const sendEmoji = async (emoji: string) => {
+    setMessages((prev) => [...prev, "You: " + emoji]);
+
+    try {
+      const res = await fetch("https://mental-health-journal-chatbot.onrender.com/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Sia",
+          message: emoji,
+        }),
+      });
+
+      const data = await res.json();
+      setMessages((prev) => [...prev, "Bot: " + data.data.botReply]);
+    } catch (error) {
+      setMessages((prev) => [...prev, "Bot: Backend not responding"]);
+    }
+  };
+
+
   return (
     <div style={{ padding: 20 }}>
       <h2>Chat with Support Bot</h2>
@@ -43,6 +65,15 @@ export default function ChatPage() {
           <p key={i}>{msg}</p>
         ))}
       </div>
+
+            <div style={{ margin: "10px 0" }}>
+        <button onClick={() => sendEmoji("😃")}>😃</button>
+        <button onClick={() => sendEmoji("🙂")}>🙂</button>
+        <button onClick={() => sendEmoji("😐")}>😐</button>
+        <button onClick={() => sendEmoji("😔")}>😔</button>
+        <button onClick={() => sendEmoji("😣")}>😣</button>
+      </div>
+
 
       <input
         value={message}
