@@ -12,7 +12,8 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, "You: " + message]);
 
     try {
-      const res = await fetch("http://localhost:5000/messages", {
+      cconst res = await fetch("https://mental-health-journal-chatbot.onrender.com/messages", {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +28,6 @@ export default function ChatPage() {
 
       // 👇 THIS is important
      setMessages((prev) => [...prev, "Bot: " + data.reply]);
-
       setMessage("");
     } catch (error) {
       setMessages((prev) => [...prev, "Bot: Backend not responding"]);
