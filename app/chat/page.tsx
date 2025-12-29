@@ -1,19 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-type Message = {
-  sender: "user" | "bot";
-  text: string;
-};
+import { useState } from "react";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const [messages, setMessages] = useState<
+    { sender: "user" | "bot"; text: string }[]
+  >([]);
 
   const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
+    if (!text) return;
 
     setMessages((prev) => [...prev, { sender: "user", text }]);
 
@@ -32,11 +28,11 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-setMessages((prev) => [
-  ...prev,
-  { sender: "bot", text: data.reply },
-]);
-
+      // ✅ ONLY THIS — backend sends { reply: "..." }
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: data.reply },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -47,84 +43,59 @@ setMessages((prev) => [
     setMessage("");
   };
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <h2 style={styles.heading}>💙 Mental Health Support Bot</h2>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>💙 Mental Health Support Bot</h2>
 
-        <div style={styles.chatBox}>
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              style={{
-                ...styles.message,
-                alignSelf:
-                  msg.sender === "user" ? "flex-end" : "flex-start",
-                background:
-                  msg.sender === "user"
-                    ? "linear-gradient(135deg, #2563eb, #1e40af)"
-                    : "#e5e7eb",
-                color: msg.sender === "user" ? "#fff" : "#000",
-              }}
-            >
-              {msg.text}
-            </div>
-          ))}
-          <div ref={chatEndRef} />
-        </div>
-
-        <div style={styles.emojiRow}>
-          {["😃", "🙂", "😐", "😔", "😣"].map((e) => (
-            <button
-              key={e}
-              style={styles.emojiBtn}
-              onClick={() => sendMessage(e)}
-            >
-              {e}
-            </button>
-          ))}
-        </div>
-
-        <div style={styles.inputRow}>
-          <input
-            style={styles.input}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type how you feel..."
-            onKeyDown={(e) => e.key === "Enter" && sendMessage(message)}
-          />
-          <button
-            style={styles.sendBtn}
-            onClick={() => sendMessage(message)}
+      <div style={styles.chatBox}>
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              ...styles.message,
+              alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
+              background: msg.sender === "user" ? "#2563eb" : "#e5e7eb",
+              color: msg.sender === "user" ? "#fff" : "#000",
+            }}
           >
-            Send
+            {msg.text}
+          </div>
+        ))}
+      </div>
+
+      <div style={styles.emojiRow}>
+        {["😃", "🙂", "😐", "😔", "😣"].map((e) => (
+          <button
+            key={e}
+            style={styles.emojiBtn}
+            onClick={() => sendMessage(e)}
+          >
+            {e}
           </button>
-        </div>
+        ))}
+      </div>
+
+      <div style={styles.inputRow}>
+        <input
+          style={styles.input}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type how you feel..."
+        />
+        <button style={styles.sendBtn} onClick={() => sendMessage(message)}>
+          Send
+        </button>
       </div>
     </div>
   );
 }
 
 const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #c7d2fe, #e0e7ff)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   container: {
-    width: "100%",
-    maxWidth: "420px",
-    background: "rgba(255,255,255,0.85)",
-    borderRadius: "20px",
+    maxWidth: "500px",
+    margin: "40px auto",
     padding: "20px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-    backdropFilter: "blur(10px)",
+    fontFamily: "Arial, sans-serif",
   },
   heading: {
     textAlign: "center" as const,
@@ -137,41 +108,39 @@ const styles = {
     height: "300px",
     overflowY: "auto" as const,
     padding: "10px",
-    borderRadius: "12px",
-    background: "#f8fafc",
+    borderRadius: "10px",
+    background: "#f3f4f6",
   },
   message: {
     padding: "10px 14px",
-    borderRadius: "18px",
+    borderRadius: "16px",
     maxWidth: "75%",
     fontSize: "14px",
   },
   emojiRow: {
     display: "flex",
     justifyContent: "space-around",
-    margin: "12px 0",
+    margin: "15px 0",
   },
   emojiBtn: {
     fontSize: "22px",
     background: "transparent",
     border: "none",
     cursor: "pointer",
-    transition: "transform 0.2s",
   },
   inputRow: {
     display: "flex",
-    gap: "8px",
+    gap: "10px",
   },
   input: {
     flex: 1,
     padding: "10px",
-    borderRadius: "10px",
-    border: "1px solid #c7d2fe",
-    outline: "none",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
   },
   sendBtn: {
     padding: "10px 16px",
-    borderRadius: "10px",
+    borderRadius: "8px",
     background: "#2563eb",
     color: "#fff",
     border: "none",
