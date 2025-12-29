@@ -1,25 +1,35 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<
     { sender: "user" | "bot"; text: string }[]
   >([]);
-  const [isTyping, setIsTyping] = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-
+  // 🔹 Animation setup
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   const sendMessage = async (text: string) => {
     if (!text) return;
 
     setMessages((prev) => [...prev, { sender: "user", text }]);
-    setIsTyping(true);
 
     try {
       const res = await fetch(
@@ -36,19 +46,15 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "bot", text: data.reply },
-        ]);
-        setIsTyping(false);
-      }, 700);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: data.reply },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "Backend not responding 💔" },
       ]);
-      setIsTyping(false);
     }
 
     setMessage("");
@@ -72,19 +78,20 @@ export default function ChatPage() {
             {msg.text}
           </div>
         ))}
-
-        {isTyping && (
-          <div style={styles.typing}>Bot is typing…</div>
-        )}
-
-        <div ref={bottomRef} />
       </div>
 
+      {/* 😊 Emoji buttons */}
       <div style={styles.emojiRow}>
         {["😃", "🙂", "😐", "😔", "😣"].map((e) => (
           <button
             key={e}
             style={styles.emojiBtn}
+            onMouseOver={(el) =>
+              (el.currentTarget.style.transform = "scale(1.3)")
+            }
+            onMouseOut={(el) =>
+              (el.currentTarget.style.transform = "scale(1)")
+            }
             onClick={() => sendMessage(e)}
           >
             {e}
@@ -98,7 +105,6 @@ export default function ChatPage() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type how you feel..."
-          onKeyDown={(e) => e.key === "Enter" && sendMessage(message)}
         />
         <button style={styles.sendBtn} onClick={() => sendMessage(message)}>
           Send
@@ -110,7 +116,7 @@ export default function ChatPage() {
 
 const styles = {
   container: {
-    maxWidth: "520px",
+    maxWidth: "500px",
     margin: "40px auto",
     padding: "20px",
     fontFamily: "Arial, sans-serif",
@@ -125,24 +131,18 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: "10px",
-    height: "320px",
+    height: "300px",
     overflowY: "auto" as const,
-    padding: "14px",
-    borderRadius: "14px",
+    padding: "10px",
+    borderRadius: "12px",
     background: "#f3f4f6",
   },
   message: {
-    padding: "10px 14px",
-    borderRadius: "16px",
+    padding: "12px 16px",
+    borderRadius: "18px",
     maxWidth: "75%",
     fontSize: "14px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-  },
-  typing: {
-    fontSize: "13px",
-    color: "#6b7280",
-    fontStyle: "italic",
-    marginLeft: "4px",
+    animation: "fadeIn 0.3s ease-in",
   },
   emojiRow: {
     display: "flex",
@@ -150,11 +150,11 @@ const styles = {
     margin: "15px 0",
   },
   emojiBtn: {
-    fontSize: "22px",
+    fontSize: "24px",
     background: "transparent",
     border: "none",
     cursor: "pointer",
-    transition: "transform 0.1s",
+    transition: "transform 0.15s ease",
   },
   inputRow: {
     display: "flex",
