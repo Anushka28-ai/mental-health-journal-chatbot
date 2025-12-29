@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<
     { sender: "user" | "bot"; text: string }[]
   >([]);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   const sendMessage = async (text: string) => {
     if (!text) return;
 
     setMessages((prev) => [...prev, { sender: "user", text }]);
+    setIsTyping(true);
 
     try {
       const res = await fetch(
@@ -28,16 +36,19 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      // ✅ ONLY THIS — backend sends { reply: "..." }
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: data.reply },
-      ]);
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: data.reply },
+        ]);
+        setIsTyping(false);
+      }, 700);
     } catch {
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "Backend not responding 💔" },
       ]);
+      setIsTyping(false);
     }
 
     setMessage("");
@@ -61,6 +72,12 @@ export default function ChatPage() {
             {msg.text}
           </div>
         ))}
+
+        {isTyping && (
+          <div style={styles.typing}>Bot is typing…</div>
+        )}
+
+        <div ref={bottomRef} />
       </div>
 
       <div style={styles.emojiRow}>
@@ -81,6 +98,7 @@ export default function ChatPage() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type how you feel..."
+          onKeyDown={(e) => e.key === "Enter" && sendMessage(message)}
         />
         <button style={styles.sendBtn} onClick={() => sendMessage(message)}>
           Send
@@ -92,26 +110,25 @@ export default function ChatPage() {
 
 const styles = {
   container: {
-    maxWidth: "500px",
+    maxWidth: "520px",
     margin: "40px auto",
     padding: "20px",
     fontFamily: "Arial, sans-serif",
   },
- heading: {
-  textAlign: "center" as const,
-  marginBottom: "15px",
-  color: "#1f2937", // dark gray (visible & classy)
-  fontWeight: "bold",
-},
-
+  heading: {
+    textAlign: "center" as const,
+    marginBottom: "15px",
+    color: "#1f2937",
+    fontWeight: "bold",
+  },
   chatBox: {
     display: "flex",
     flexDirection: "column" as const,
     gap: "10px",
-    height: "300px",
+    height: "320px",
     overflowY: "auto" as const,
-    padding: "10px",
-    borderRadius: "10px",
+    padding: "14px",
+    borderRadius: "14px",
     background: "#f3f4f6",
   },
   message: {
@@ -119,6 +136,13 @@ const styles = {
     borderRadius: "16px",
     maxWidth: "75%",
     fontSize: "14px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+  },
+  typing: {
+    fontSize: "13px",
+    color: "#6b7280",
+    fontStyle: "italic",
+    marginLeft: "4px",
   },
   emojiRow: {
     display: "flex",
@@ -130,6 +154,7 @@ const styles = {
     background: "transparent",
     border: "none",
     cursor: "pointer",
+    transition: "transform 0.1s",
   },
   inputRow: {
     display: "flex",
