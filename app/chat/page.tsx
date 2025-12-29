@@ -97,10 +97,13 @@ const styles = {
     padding: "20px",
     fontFamily: "Arial, sans-serif",
   },
-  heading: {
-    textAlign: "center" as const,
-    marginBottom: "15px",
-  },
+ heading: {
+  textAlign: "center" as const,
+  marginBottom: "15px",
+  color: "#1f2937", // dark gray (visible & classy)
+  fontWeight: "bold",
+},
+
   chatBox: {
     display: "flex",
     flexDirection: "column" as const,
