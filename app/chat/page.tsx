@@ -32,10 +32,11 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: data.data.botReply },
-      ]);
+setMessages((prev) => [
+  ...prev,
+  { sender: "bot", text: data.reply },
+]);
+
     } catch {
       setMessages((prev) => [
         ...prev,
