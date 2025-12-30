@@ -7,6 +7,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<
     { sender: "user" | "bot"; text: string }[]
   >([]);
+  const [isTyping, setIsTyping] = useState(false); // ✅ FIX
 
   // 🔹 Animation setup
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function ChatPage() {
     if (!text) return;
 
     setMessages((prev) => [...prev, { sender: "user", text }]);
+    setIsTyping(true);
 
     try {
       const res = await fetch(
@@ -48,13 +50,15 @@ export default function ChatPage() {
 
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: data.reply },
+        { sender: "bot", text: data.reply }, // ✅ backend sends { reply }
       ]);
     } catch {
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "Backend not responding 💔" },
       ]);
+    } finally {
+      setIsTyping(false); // ✅ typing stops
     }
 
     setMessage("");
@@ -78,7 +82,14 @@ export default function ChatPage() {
             {msg.text}
           </div>
         ))}
-      </div>
+
+      
+      </div>{isTyping && (
+  <div style={{ fontStyle: "italic", color: "#6b7280" }}>
+    AIRA is typing…
+  </div>
+)}
+
 
       {/* 😊 Emoji buttons */}
       <div style={styles.emojiRow}>
@@ -143,6 +154,12 @@ const styles = {
     maxWidth: "75%",
     fontSize: "14px",
     animation: "fadeIn 0.3s ease-in",
+  },
+  typing: {
+    fontStyle: "italic",
+    color: "#6b7280",
+    fontSize: "13px",
+    marginLeft: "6px",
   },
   emojiRow: {
     display: "flex",

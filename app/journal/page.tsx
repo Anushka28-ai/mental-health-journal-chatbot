@@ -3,73 +3,114 @@
 import React, { useState } from "react";
 
 export default function JournalPage() {
-  const [entry, setEntry] = useState<string>("");
-  const [mood, setMood] = useState<string>("Happy");
-  const [saving, setSaving] = useState<boolean>(false);
+  const [entry, setEntry] = useState("");
+  const [entries, setEntries] = useState<string[]>([]);
+  const [mood, setMood] = useState("Happy");
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      // Example POST to your backend. Adjust URL/path to match your server routes.
-      // If backend runs on a different port while developing, use the full URL:
-      // const res = await fetch("http://localhost:5000/api/journals", { ... })
-      const res = await fetch("/api/journals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mood, entry, date: new Date().toISOString() }),
-      });
-      if (!res.ok) throw new Error(`Server responded ${res.status}`);
-      // Reset or show confirmation
-      setEntry("");
-      setMood("Happy");
-      alert("Entry saved");
-    } catch (err) {
-      console.error("Save failed:", err);
-      alert("Failed to save entry (check console)");
-    } finally {
-      setSaving(false);
-    }
+  const saveEntry = () => {
+    if (!entry.trim()) return;
+
+    const fullEntry = `${mood} — ${entry}`;
+    setEntries((prev) => [...prev, fullEntry]);
+    setEntry("");
+    setMood("Happy");
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 680 }}>
-      <h2>Daily Mental Health Journal</h2>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>📝 Your Private Journal</h2>
 
-      <label htmlFor="mood">Mood:</label>
-      <br />
+      <label style={styles.label}>Mood</label>
       <select
-        id="mood"
         value={mood}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-          setMood(e.target.value)
-        }
+        onChange={(e) => setMood(e.target.value)}
+        style={styles.select}
       >
         <option>Happy</option>
         <option>Neutral</option>
         <option>Sad</option>
-        <option>Angry</option>
         <option>Anxious</option>
+        <option>Angry</option>
       </select>
 
-      <br />
-      <br />
-
       <textarea
-        rows={8}
-        cols={60}
         value={entry}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setEntry(e.target.value)
-        }
-        placeholder="Write how you feel today..."
-        style={{ width: "100%", minHeight: 160, padding: 8, fontSize: 15 }}
+        onChange={(e) => setEntry(e.target.value)}
+        placeholder="Write freely… this space is just for you 🌱"
+        style={styles.textarea}
       />
 
-      <br />
-      <br />
-      <button onClick={handleSave} disabled={saving || entry.trim() === ""}>
-        {saving ? "Saving..." : "Save Entry"}
+      <button style={styles.saveBtn} onClick={saveEntry}>
+        Save Entry
       </button>
+
+      {/* Saved entries */}
+      <div style={{ marginTop: 24 }}>
+        {entries.map((e, i) => (
+          <div key={i} style={styles.entryCard}>
+            {e}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: 680,
+    margin: "40px auto",
+    padding: 20,
+    background: "#eef2ff",
+    minHeight: "100vh",
+    fontFamily: "Arial, sans-serif",
+  },
+  heading: {
+    textAlign: "center" as const,
+    marginBottom: 20,
+    color: "#1f2937",
+  },
+  label: {
+  fontWeight: "600",
+  color: "#374151",
+  marginBottom: 6,
+  display: "block",
+},
+
+  select: {
+    width: "100%",
+    padding: 10,
+    marginBottom: 14,
+    borderRadius: 8,
+  },
+ textarea: {
+  width: "100%",
+  minHeight: 160,
+  padding: 12,
+  borderRadius: 10,
+  border: "1px solid #c7d2fe",
+  fontSize: 15,
+  color: "#111827",
+  background: "#ffffff",
+},
+
+  saveBtn: {
+    marginTop: 12,
+    padding: "10px 18px",
+    background: "#4f46e5",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+  },
+ entryCard: {
+  background: "#ffffff",
+  padding: 14,
+  borderRadius: 12,
+  marginTop: 12,
+  boxShadow: "0 6px 14px rgba(0,0,0,0.08)",
+  color: "#1f2937",
+  fontSize: "15px",
+  lineHeight: "1.6",
+},
+
